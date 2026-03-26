@@ -22,6 +22,11 @@ Thumbs.db
 .vscode/
 .idea/
 
+# lockfiles (only pnpm-lock.yaml is used)
+package-lock.json
+yarn.lock
+
 # logs
 *.log
 npm-debug.log*
+pnpm-debug.log*

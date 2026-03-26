@@ -10,7 +10,7 @@
 ## Installation
 
 ```bash
-npm install next-lite-auth jose
+pnpm add next-lite-auth jose
 ```
 
 ## Quick Setup

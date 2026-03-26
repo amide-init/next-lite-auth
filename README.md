@@ -18,7 +18,7 @@ Lightweight JWT auth for Next.js using static JSON users — no database require
 ## Installation
 
 ```bash
-npm install next-lite-auth jose
+pnpm add next-lite-auth jose
 ```
 
 ---
