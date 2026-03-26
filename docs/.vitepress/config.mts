@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "next-lite-auth",
   description: "Lightweight JWT auth for Next.js using static JSON users — no database required.",
+  base: "/next-lite-auth/",
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
