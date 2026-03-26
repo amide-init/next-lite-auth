@@ -8,7 +8,7 @@ Lightweight JWT auth for Next.js using static JSON users — no database require
 
 ## Requirements
 
-- Node.js >= 22
+- Node.js >= 20
 - Next.js >= 13
 - React >= 18
 - TypeScript

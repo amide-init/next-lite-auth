@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js >= 22
+- Node.js >= 20
 - Next.js >= 13
 - React >= 18
 - TypeScript
