@@ -1,1 +1,1 @@
-export { useLiteAuth } from "./useLiteAuth";
+export { LiteAuthProvider, useLiteAuth } from "./LiteAuthProvider";

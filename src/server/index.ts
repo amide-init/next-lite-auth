@@ -1,2 +1,2 @@
-export { makeLoginHandler, makeLogoutHandler, makeMeHandler } from "./handlers";
+export { makeHandlers } from "./handlers";
 export { getUserFromCookies } from "./getUserFromCookies";

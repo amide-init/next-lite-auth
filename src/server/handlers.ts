@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { LiteAuthContext } from "../core/types";
 import { signToken, verifyToken } from "./jwt";
 
-export function makeLoginHandler(ctx: LiteAuthContext) {
-  return async function loginHandler(req: NextRequest): Promise<NextResponse> {
+export function makeHandlers(ctx: LiteAuthContext) {
+  async function login(req: NextRequest): Promise<NextResponse> {
     let body: { email?: string; password?: string };
     try {
       body = await req.json();
@@ -30,36 +30,37 @@ export function makeLoginHandler(ctx: LiteAuthContext) {
       path: "/",
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
     });
     return res;
-  };
-}
+  }
 
-export function makeLogoutHandler(ctx: LiteAuthContext) {
-  return async function logoutHandler(_req: NextRequest): Promise<NextResponse> {
+  async function logout(_req: NextRequest): Promise<NextResponse> {
     const res = NextResponse.json({ ok: true });
-    res.cookies.set(ctx.cookieName, "", {
-      httpOnly: true,
-      path: "/",
-      maxAge: 0,
-    });
+    res.cookies.set(ctx.cookieName, "", { httpOnly: true, path: "/", maxAge: 0 });
     return res;
-  };
-}
+  }
 
-export function makeMeHandler(ctx: LiteAuthContext) {
-  return async function meHandler(req: NextRequest): Promise<NextResponse> {
+  async function me(req: NextRequest): Promise<NextResponse> {
     const token = req.cookies.get(ctx.cookieName)?.value;
-    if (!token) {
-      return NextResponse.json({ user: null }, { status: 401 });
-    }
-
+    if (!token) return NextResponse.json({ user: null }, { status: 401 });
     const user = await verifyToken(token, ctx.jwtSecret);
-    if (!user) {
-      return NextResponse.json({ user: null }, { status: 401 });
-    }
-
+    if (!user) return NextResponse.json({ user: null }, { status: 401 });
     return NextResponse.json({ user });
-  };
+  }
+
+  async function GET(req: NextRequest): Promise<NextResponse> {
+    const action = req.nextUrl.pathname.split("/").pop();
+    if (action === "me") return me(req);
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  async function POST(req: NextRequest): Promise<NextResponse> {
+    const action = req.nextUrl.pathname.split("/").pop();
+    if (action === "login") return login(req);
+    if (action === "logout") return logout(req);
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return { GET, POST };
 }

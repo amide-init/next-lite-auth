@@ -1,5 +1,5 @@
 import { LiteAuthConfig, LiteAuthContext } from "./types";
-import { makeLoginHandler, makeLogoutHandler, makeMeHandler, getUserFromCookies } from "../server";
+import { makeHandlers, getUserFromCookies } from "../server";
 import { makeMiddleware } from "../middleware";
 
 export function createLiteAuth(config: LiteAuthConfig) {
@@ -10,11 +10,7 @@ export function createLiteAuth(config: LiteAuthConfig) {
   };
 
   return {
-    handlers: {
-      login: makeLoginHandler(ctx),
-      logout: makeLogoutHandler(ctx),
-      me: makeMeHandler(ctx),
-    },
+    handlers: makeHandlers(ctx),
     middleware: makeMiddleware(ctx),
     getUserFromCookies: getUserFromCookies(ctx),
   };
