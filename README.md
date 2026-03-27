@@ -25,61 +25,68 @@ pnpm add next-lite-auth jose
 
 ---
 
-## Setup
+## Setup in 5 minutes
 
-### 1. Create your auth instance
+### 1. Create `auth.ts` at your project root
 
 ```ts
-// lib/auth.ts
+// auth.ts
 import { createLiteAuth } from "next-lite-auth";
 
-export const auth = createLiteAuth({
+export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
   users: [
     { email: "admin@example.com", password: "secret", role: "admin", name: "Admin" },
-    { email: "user@example.com", password: "pass123", role: "user", name: "User" },
   ],
   jwtSecret: process.env.JWT_SECRET!,
-  cookieName: "lite-auth-token", // optional, this is the default
 });
 ```
 
-### 2. Add route handlers
+```bash
+# .env.local
+JWT_SECRET=your-random-secret-here
+```
+
+### 2. Add one route file
 
 ```ts
-// app/api/auth/login/route.ts
-import { auth } from "@/lib/auth";
-export const POST = auth.handlers.login;
-
-// app/api/auth/logout/route.ts
-import { auth } from "@/lib/auth";
-export const POST = auth.handlers.logout;
-
-// app/api/auth/me/route.ts
-import { auth } from "@/lib/auth";
-export const GET = auth.handlers.me;
+// app/api/auth/[...liteauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
 ```
 
 ### 3. Add middleware
 
 ```ts
 // middleware.ts
-import { auth } from "@/lib/auth";
-
-export default auth.middleware({
-  protect: ["/dashboard", "/settings"],
-  redirectTo: "/login", // optional, default is "/login"
-});
+import { middleware } from "@/auth";
+export default middleware({ protect: ["/dashboard"] });
 
 export const config = {
   matcher: ["/((?!_next|api/auth).*)"],
 };
 ```
 
-### 4. Use on the client
+### 4. Wrap root layout
+
+```tsx
+// app/layout.tsx
+import { LiteAuthProvider } from "next-lite-auth/client";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <LiteAuthProvider>{children}</LiteAuthProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 5. Use anywhere
 
 ```tsx
 "use client";
-
 import { useLiteAuth } from "next-lite-auth/client";
 
 export default function LoginPage() {
@@ -116,16 +123,18 @@ export default function LoginPage() {
 }
 ```
 
-### 5. Read user on the server
+### Read user on the server
 
 ```ts
 // app/dashboard/page.tsx
 import { cookies } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getUserFromCookies } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const user = await auth.getUserFromCookies(cookies());
-  return <p>Welcome, {user?.name}</p>;
+  const user = await getUserFromCookies(cookies());
+  if (!user) redirect("/login");
+  return <h1>Welcome, {user.name}</h1>;
 }
 ```
 
@@ -133,76 +142,15 @@ export default async function DashboardPage() {
 
 ## API Reference
 
-### `createLiteAuth(config)`
-
-| Option | Type | Required | Description |
-|---|---|---|---|
-| `users` | `User[]` | Yes | Hardcoded list of users |
-| `jwtSecret` | `string` | Yes | Secret used to sign JWTs |
-| `cookieName` | `string` | No | Cookie name (default: `"lite-auth-token"`) |
-
-Returns `{ handlers, middleware, getUserFromCookies }`.
-
----
-
-### `User` type
-
-```ts
-type User = {
-  email: string;
-  password: string;
-  role?: string;
-  name?: string;
-};
-```
-
----
-
-### `auth.handlers`
-
-| Handler | Method | Route |
-|---|---|---|
-| `login` | POST | `/api/auth/login` |
-| `logout` | POST | `/api/auth/logout` |
-| `me` | GET | `/api/auth/me` |
-
----
-
-### `auth.middleware(options)`
-
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `protect` | `string[]` | — | Route prefixes to protect |
-| `redirectTo` | `string` | `"/login"` | Where to redirect unauthenticated users |
-
-Appends `?from=<pathname>` to the redirect URL.
-
----
-
-### `auth.getUserFromCookies(cookies)`
-
-Server-side helper. Accepts Next.js `cookies()` and returns the current `PublicUser` or `null`.
-
----
-
-### `useLiteAuth(options?)`
-
-Client hook. Fetches `/api/auth/me` on mount.
-
-```ts
-const { user, loading, login, logout } = useLiteAuth({
-  loginPath: "/api/auth/login",   // optional
-  logoutPath: "/api/auth/logout", // optional
-  mePath: "/api/auth/me",         // optional
-});
-```
-
-| Return | Type | Description |
-|---|---|---|
-| `user` | `PublicUser \| null` | Current authenticated user |
-| `loading` | `boolean` | True while fetching session |
-| `login(creds)` | `Promise<{ error?: string }>` | Logs in and sets user state |
-| `logout()` | `Promise<void>` | Clears cookie and user state |
+| Export | Description |
+|---|---|
+| `createLiteAuth(config)` | Factory — returns `handlers`, `middleware`, `getUserFromCookies` |
+| `handlers.GET` | Catch-all GET handler (me) |
+| `handlers.POST` | Catch-all POST handler (login, logout) |
+| `middleware(options)` | Edge middleware for route protection |
+| `getUserFromCookies(cookies)` | Server-side session helper |
+| `LiteAuthProvider` | React context provider (client) |
+| `useLiteAuth()` | React hook — user, loading, login, logout (client) |
 
 ---
 
@@ -211,7 +159,6 @@ const { user, loading, login, logout } = useLiteAuth({
 - OAuth / social login
 - Signup / registration
 - Password reset
-- Role-based access control
 - Production-grade security
 
 ---

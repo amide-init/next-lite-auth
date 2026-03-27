@@ -1,51 +1,30 @@
 # handlers
 
-Three Next.js route handler functions returned from `createLiteAuth`.
+`auth.handlers` returns `{ GET, POST }` — a pair of Next.js route handler functions for a catch-all route.
 
-## `auth.handlers.login`
+## Usage
 
 ```ts
-POST /api/auth/login
-Content-Type: application/json
-
-{ "email": string, "password": string }
+// app/api/auth/[...liteauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
 ```
 
-- Validates credentials against the users config
-- On success: signs a JWT, sets an httpOnly cookie, returns `{ user: PublicUser }`
-- On failure: returns `{ error: string }` with status `401`
+## Routing
 
-## `auth.handlers.logout`
+The handlers dispatch based on the last URL segment:
 
-```ts
-POST /api/auth/logout
-```
+| Method | Segment | Action |
+|---|---|---|
+| `GET` | `me` | Return current user from JWT cookie |
+| `POST` | `login` | Validate credentials, sign JWT, set cookie |
+| `POST` | `logout` | Clear auth cookie |
 
-- Clears the auth cookie (`maxAge: 0`)
-- Returns `{ ok: true }`
-
-## `auth.handlers.me`
+## Signature
 
 ```ts
-GET /api/auth/me
-```
-
-- Reads the JWT from the cookie
-- Returns `{ user: PublicUser }` on success
-- Returns `{ user: null }` with status `401` if missing or invalid
-
-## Route setup
-
-```ts
-// app/api/auth/login/route.ts
-import { auth } from "@/lib/auth";
-export const POST = auth.handlers.login;
-
-// app/api/auth/logout/route.ts
-import { auth } from "@/lib/auth";
-export const POST = auth.handlers.logout;
-
-// app/api/auth/me/route.ts
-import { auth } from "@/lib/auth";
-export const GET = auth.handlers.me;
+type Handlers = {
+  GET: (req: NextRequest) => Promise<NextResponse>;
+  POST: (req: NextRequest) => Promise<NextResponse>;
+};
 ```

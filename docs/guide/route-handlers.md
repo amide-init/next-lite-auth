@@ -1,26 +1,24 @@
 # Route Handlers
 
-`auth.handlers` provides three ready-to-use Next.js route handlers.
+A single catch-all route file handles all auth endpoints automatically.
 
 ## Setup
 
 ```ts
-// app/api/auth/login/route.ts
-import { auth } from "@/lib/auth";
-export const POST = auth.handlers.login;
-
-// app/api/auth/logout/route.ts
-import { auth } from "@/lib/auth";
-export const POST = auth.handlers.logout;
-
-// app/api/auth/me/route.ts
-import { auth } from "@/lib/auth";
-export const GET = auth.handlers.me;
+// app/api/auth/[...liteauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
 ```
 
-## `login` — POST `/api/auth/login`
+## Endpoints
 
-Accepts a JSON body with `email` and `password`. Validates against the users config, signs a JWT, and sets an httpOnly cookie.
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/auth/login` | Validate credentials, sign JWT, set cookie |
+| `POST` | `/api/auth/logout` | Clear the auth cookie |
+| `GET` | `/api/auth/me` | Return the current user from cookie |
+
+## `POST /api/auth/login`
 
 **Request body:**
 ```json
@@ -37,18 +35,14 @@ Accepts a JSON body with `email` and `password`. Validates against the users con
 { "error": "Invalid credentials" }
 ```
 
-## `logout` — POST `/api/auth/logout`
-
-Clears the auth cookie by setting its `maxAge` to 0.
+## `POST /api/auth/logout`
 
 **Success (200):**
 ```json
 { "ok": true }
 ```
 
-## `me` — GET `/api/auth/me`
-
-Reads and verifies the JWT from the cookie, returning the current user.
+## `GET /api/auth/me`
 
 **Success (200):**
 ```json

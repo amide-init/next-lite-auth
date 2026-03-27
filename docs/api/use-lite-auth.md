@@ -1,6 +1,6 @@
 # useLiteAuth
 
-Client-side React hook for session management.
+React hook that reads auth state from the nearest `<LiteAuthProvider>`.
 
 ## Import
 
@@ -11,11 +11,7 @@ import { useLiteAuth } from "next-lite-auth/client";
 ## Signature
 
 ```ts
-function useLiteAuth(options?: {
-  loginPath?: string;   // default: "/api/auth/login"
-  logoutPath?: string;  // default: "/api/auth/logout"
-  mePath?: string;      // default: "/api/auth/me"
-}): {
+function useLiteAuth(): {
   user: PublicUser | null;
   loading: boolean;
   login: (creds: { email: string; password: string }) => Promise<{ error?: string }>;
@@ -32,14 +28,6 @@ function useLiteAuth(options?: {
 | `login` | `Function` | Submits credentials and updates state |
 | `logout` | `Function` | Clears the cookie and sets `user` to `null` |
 
-## `login` return value
-
-```ts
-{ error?: string }
-```
-
-An empty object `{}` means success. `{ error: "..." }` means failure.
-
 ## Example
 
 ```tsx
@@ -52,7 +40,7 @@ export function AuthButton() {
   if (loading) return null;
 
   if (user) {
-    return <button onClick={logout}>Logout</button>;
+    return <button onClick={logout}>Logout ({user.email})</button>;
   }
 
   return (
@@ -62,3 +50,11 @@ export function AuthButton() {
   );
 }
 ```
+
+::: warning
+Must be used inside `<LiteAuthProvider>`. Throws if called outside.
+:::
+
+## See also
+
+- [LiteAuthProvider](/api/lite-auth-provider) — the context provider required by this hook
