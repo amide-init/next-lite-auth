@@ -1,5 +1,10 @@
 # LiteLoginPage
 
+## Preview
+
+<LoginPreview />
+
+
 The built-in login UI rendered automatically by `LiteAuthProvider` when a user visits a protected route without being authenticated. You do not need to use this component directly.
 
 ## Automatic rendering
