@@ -41,10 +41,15 @@ import { LiteLoginPage } from "next-lite-auth/client";
 
 ## Tailwind requirement
 
-Uses shadcn/ui Tailwind CSS variables. Add the library to your Tailwind content config:
+Uses shadcn/ui CSS variables (`bg-primary`, `bg-card`, `text-muted-foreground`, etc.). Your existing shadcn theme is applied automatically.
 
+**Tailwind v4** — add to `app/globals.css`:
+```css
+@source "../node_modules/next-lite-auth/dist";
+```
+
+**Tailwind v3** — add to `tailwind.config.ts`:
 ```ts
-// tailwind.config.ts
 content: [
   "./app/**/*.{ts,tsx}",
   "./node_modules/next-lite-auth/dist/**/*.{js,mjs}",

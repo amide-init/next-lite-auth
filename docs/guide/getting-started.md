@@ -82,17 +82,37 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Tailwind setup
 
-Add the library to your Tailwind `content` array so the login UI styles are included:
+The built-in login UI uses shadcn/ui Tailwind CSS variables. You need to tell Tailwind to scan the library's dist files so the styles are not purged.
+
+### Tailwind v4 (no config file)
+
+Add this to your global CSS file (`app/globals.css`):
+
+```css
+@source "../node_modules/next-lite-auth/dist";
+```
+
+### Tailwind v3 (tailwind.config.ts)
 
 ```ts
 // tailwind.config.ts
 export default {
   content: [
     "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
     "./node_modules/next-lite-auth/dist/**/*.{js,mjs}", // ← add this
   ],
 };
 ```
+
+Not sure which version you have? Run:
+```bash
+pnpm list tailwindcss
+```
+
+::: tip
+The login UI uses shadcn/ui CSS variables (`bg-primary`, `bg-card`, `text-muted-foreground`, etc.) so your existing shadcn theme is applied automatically.
+:::
 
 ---
 
