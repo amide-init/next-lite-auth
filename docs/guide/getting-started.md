@@ -6,6 +6,7 @@
 - Next.js >= 13
 - React >= 18
 - TypeScript
+- Tailwind CSS + shadcn/ui (for built-in login UI)
 
 ## Installation
 
@@ -15,7 +16,7 @@ pnpm add next-lite-auth jose
 
 ---
 
-## Setup in 5 minutes
+## Setup in 3 steps
 
 ### 1. Create `auth.ts` at your project root
 
@@ -51,25 +52,9 @@ import { handlers } from "@/auth";
 export const { GET, POST } = handlers;
 ```
 
-That's it — login, logout, and me are all handled automatically.
-
 ---
 
-### 3. Add middleware
-
-```ts
-// middleware.ts
-import { middleware } from "@/auth";
-export default middleware({ protect: ["/dashboard"] });
-
-export const config = {
-  matcher: ["/((?!_next|api/auth).*)"],
-};
-```
-
----
-
-### 4. Wrap root layout with `LiteAuthProvider`
+### 3. Wrap root layout with `LiteAuthProvider`
 
 ```tsx
 // app/layout.tsx
@@ -79,56 +64,83 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <body>
-        <LiteAuthProvider>{children}</LiteAuthProvider>
+        <LiteAuthProvider protect={["/dashboard", "/settings"]}>
+          {children}
+        </LiteAuthProvider>
       </body>
     </html>
   );
 }
 ```
 
+**That's it.** When a user visits a protected route without being logged in, the built-in login UI appears automatically. After login, the original page renders — no redirects, no separate login page needed.
+
 ---
 
-### 5. Use `useLiteAuth` anywhere
+## Tailwind setup
+
+Add the library to your Tailwind `content` array so the login UI styles are included:
+
+```ts
+// tailwind.config.ts
+export default {
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./node_modules/next-lite-auth/dist/**/*.{js,mjs}", // ← add this
+  ],
+};
+```
+
+---
+
+## Optional: server-side middleware
+
+Add middleware to also protect routes on the server side (recommended):
+
+```ts
+// middleware.ts
+import { middleware } from "@/auth";
+export default middleware({ protect: ["/dashboard", "/settings"] });
+
+export const config = {
+  matcher: ["/((?!_next|api/auth).*)"],
+};
+```
+
+---
+
+## Use `useLiteAuth` anywhere
 
 ```tsx
 "use client";
 import { useLiteAuth } from "next-lite-auth/client";
 
-export default function LoginPage() {
-  const { user, loading, login, logout } = useLiteAuth();
-
-  if (loading) return <p>Loading...</p>;
-
-  if (user) {
-    return (
-      <div>
-        <p>Hello, {user.name ?? user.email}</p>
-        <button onClick={logout}>Logout</button>
-      </div>
-    );
-  }
-
+export function Navbar() {
+  const { user, logout } = useLiteAuth();
+  if (!user) return null;
   return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const result = await login({
-          email: form.email.value,
-          password: form.password.value,
-        });
-        if (result.error) alert(result.error);
-      }}
-    >
-      <input name="email" type="email" placeholder="Email" />
-      <input name="password" type="password" placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
+    <div>
+      <span>{user.name ?? user.email}</span>
+      <button onClick={logout}>Logout</button>
+    </div>
   );
 }
 ```
 
 ---
+
+## Read user on the server
+
+```ts
+// app/dashboard/page.tsx
+import { cookies } from "next/headers";
+import { getUserFromCookies } from "@/auth";
+
+export default async function DashboardPage() {
+  const user = await getUserFromCookies(cookies());
+  return <h1>Welcome, {user?.name}</h1>;
+}
+```
 
 ::: tip
 Store your `jwtSecret` in `.env.local` and never commit it to source control.

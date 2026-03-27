@@ -14,6 +14,7 @@ Lightweight JWT auth for Next.js using static JSON users — no database require
 - Next.js >= 13
 - React >= 18
 - TypeScript
+- Tailwind CSS + shadcn/ui (for built-in login UI)
 
 ---
 
@@ -25,12 +26,11 @@ pnpm add next-lite-auth jose
 
 ---
 
-## Setup in 5 minutes
+## Setup in 3 steps
 
 ### 1. Create `auth.ts` at your project root
 
 ```ts
-// auth.ts
 import { createLiteAuth } from "next-lite-auth";
 
 export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
@@ -54,19 +54,7 @@ import { handlers } from "@/auth";
 export const { GET, POST } = handlers;
 ```
 
-### 3. Add middleware
-
-```ts
-// middleware.ts
-import { middleware } from "@/auth";
-export default middleware({ protect: ["/dashboard"] });
-
-export const config = {
-  matcher: ["/((?!_next|api/auth).*)"],
-};
-```
-
-### 4. Wrap root layout
+### 3. Wrap root layout
 
 ```tsx
 // app/layout.tsx
@@ -76,90 +64,85 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <body>
-        <LiteAuthProvider>{children}</LiteAuthProvider>
+        <LiteAuthProvider protect={["/dashboard", "/settings"]}>
+          {children}
+        </LiteAuthProvider>
       </body>
     </html>
   );
 }
 ```
 
-### 5. Use anywhere
+**Done.** Visiting a protected route while logged out automatically shows the built-in login UI. After login, the original page renders instantly — no redirects, no separate login page needed.
+
+---
+
+## Tailwind setup
+
+Add the library to your Tailwind `content` config so login UI styles are included:
+
+```ts
+// tailwind.config.ts
+content: [
+  "./app/**/*.{ts,tsx}",
+  "./node_modules/next-lite-auth/dist/**/*.{js,mjs}",
+]
+```
+
+---
+
+## Optional: server-side middleware
+
+```ts
+// middleware.ts
+import { middleware } from "@/auth";
+export default middleware({ protect: ["/dashboard", "/settings"] });
+
+export const config = {
+  matcher: ["/((?!_next|api/auth).*)"],
+};
+```
+
+---
+
+## Use anywhere
 
 ```tsx
 "use client";
 import { useLiteAuth } from "next-lite-auth/client";
 
-export default function LoginPage() {
-  const { user, loading, login, logout } = useLiteAuth();
-
-  if (loading) return <p>Loading...</p>;
-
-  if (user) {
-    return (
-      <div>
-        <p>Hello, {user.name ?? user.email}</p>
-        <button onClick={logout}>Logout</button>
-      </div>
-    );
-  }
-
+export function Navbar() {
+  const { user, logout } = useLiteAuth();
+  if (!user) return null;
   return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const result = await login({
-          email: form.email.value,
-          password: form.password.value,
-        });
-        if (result.error) alert(result.error);
-      }}
-    >
-      <input name="email" type="email" placeholder="Email" />
-      <input name="password" type="password" placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
+    <div>
+      <span>{user.name ?? user.email}</span>
+      <button onClick={logout}>Logout</button>
+    </div>
   );
 }
 ```
 
-### Read user on the server
-
 ```ts
-// app/dashboard/page.tsx
+// Server Component
 import { cookies } from "next/headers";
 import { getUserFromCookies } from "@/auth";
-import { redirect } from "next/navigation";
 
-export default async function DashboardPage() {
-  const user = await getUserFromCookies(cookies());
-  if (!user) redirect("/login");
-  return <h1>Welcome, {user.name}</h1>;
-}
+const user = await getUserFromCookies(cookies());
 ```
 
 ---
 
-## API Reference
+## API
 
 | Export | Description |
 |---|---|
 | `createLiteAuth(config)` | Factory — returns `handlers`, `middleware`, `getUserFromCookies` |
-| `handlers.GET` | Catch-all GET handler (me) |
-| `handlers.POST` | Catch-all POST handler (login, logout) |
-| `middleware(options)` | Edge middleware for route protection |
+| `handlers.GET / POST` | Catch-all route handlers |
+| `middleware(options)` | Edge middleware for server-side route protection |
 | `getUserFromCookies(cookies)` | Server-side session helper |
-| `LiteAuthProvider` | React context provider (client) |
-| `useLiteAuth()` | React hook — user, loading, login, logout (client) |
-
----
-
-## Non-Goals
-
-- OAuth / social login
-- Signup / registration
-- Password reset
-- Production-grade security
+| `LiteAuthProvider` | Root provider — manages session and auto-shows login UI |
+| `useLiteAuth()` | Hook — `user`, `loading`, `login`, `logout` |
 
 ---
 

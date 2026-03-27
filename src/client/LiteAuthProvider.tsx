@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { PublicUser } from "../core/types";
+import { LiteLoginPage } from "./LiteLoginPage";
 
 type LiteAuthContextValue = {
   user: PublicUser | null;
@@ -14,6 +16,7 @@ const LiteAuthContext = createContext<LiteAuthContextValue | null>(null);
 
 type LiteAuthProviderProps = {
   children: ReactNode;
+  protect?: string[];
   loginPath?: string;
   logoutPath?: string;
   mePath?: string;
@@ -21,12 +24,14 @@ type LiteAuthProviderProps = {
 
 export function LiteAuthProvider({
   children,
+  protect = [],
   loginPath = "/api/auth/login",
   logoutPath = "/api/auth/logout",
   mePath = "/api/auth/me",
 }: LiteAuthProviderProps) {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     fetch(mePath)
@@ -56,8 +61,30 @@ export function LiteAuthProvider({
     setUser(null);
   }, [logoutPath]);
 
+  const value = { user, loading, login, logout };
+
+  const isProtected = protect.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+
+  if (loading) {
+    return (
+      <LiteAuthContext.Provider value={value}>
+        {children}
+      </LiteAuthContext.Provider>
+    );
+  }
+
+  if (!user && isProtected) {
+    return (
+      <LiteAuthContext.Provider value={value}>
+        <LiteLoginPage />
+      </LiteAuthContext.Provider>
+    );
+  }
+
   return (
-    <LiteAuthContext.Provider value={{ user, loading, login, logout }}>
+    <LiteAuthContext.Provider value={value}>
       {children}
     </LiteAuthContext.Provider>
   );

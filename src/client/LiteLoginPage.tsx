@@ -1,19 +1,18 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { useLiteAuth } from "./LiteAuthProvider";
 
-type LoginFormProps = {
-  redirectTo?: string;
+type LiteLoginPageProps = {
   title?: string;
   description?: string;
 };
 
-function LoginFormInner({ redirectTo = "/", title = "Sign in", description = "Enter your credentials to continue" }: LoginFormProps) {
+export function LiteLoginPage({
+  title = "Sign in",
+  description = "Enter your credentials to continue",
+}: LiteLoginPageProps) {
   const { login } = useLiteAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,11 +31,9 @@ function LoginFormInner({ redirectTo = "/", title = "Sign in", description = "En
 
     if (result.error) {
       setError(result.error);
-      return;
     }
-
-    const from = searchParams.get("from") ?? redirectTo;
-    router.push(from);
+    // no redirect needed — login() sets user in context,
+    // LiteAuthProvider re-renders children automatically
   }
 
   return (
@@ -110,13 +107,5 @@ function LoginFormInner({ redirectTo = "/", title = "Sign in", description = "En
 
       </div>
     </div>
-  );
-}
-
-export function LiteLoginPage(props: LoginFormProps) {
-  return (
-    <Suspense>
-      <LoginFormInner {...props} />
-    </Suspense>
   );
 }

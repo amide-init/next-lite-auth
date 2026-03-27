@@ -28,6 +28,7 @@ export default defineConfig({
           { text: "handlers", link: "/api/handlers" },
           { text: "middleware", link: "/api/middleware" },
           { text: "LiteAuthProvider", link: "/api/lite-auth-provider" },
+          { text: "LiteLoginPage", link: "/api/lite-login-page" },
           { text: "useLiteAuth", link: "/api/use-lite-auth" },
           { text: "getUserFromCookies", link: "/api/get-user-from-cookies" },
           { text: "Types", link: "/api/types" },
