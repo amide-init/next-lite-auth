@@ -2,7 +2,7 @@
 
 ## Setup
 
-Wrap your root layout with `LiteAuthProvider` once:
+Wrap your root layout with `LiteAuthProvider` and pass the routes you want to protect:
 
 ```tsx
 // app/layout.tsx
@@ -12,14 +12,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <body>
-        <LiteAuthProvider>{children}</LiteAuthProvider>
+        <LiteAuthProvider protect={["/dashboard", "/settings", "/admin"]}>
+          {children}
+        </LiteAuthProvider>
       </body>
     </html>
   );
 }
 ```
 
-Then use `useLiteAuth` in any client component:
+When a user visits a protected route without being logged in, the built-in login UI appears automatically. After login, the original page renders — no redirect needed.
+
+---
+
+## `useLiteAuth`
+
+Use the hook in any client component to access auth state:
 
 ```tsx
 "use client";
@@ -29,7 +37,7 @@ export function Navbar() {
   const { user, loading, logout } = useLiteAuth();
 
   if (loading) return null;
-  if (!user) return <a href="/login">Login</a>;
+  if (!user) return null;
 
   return (
     <div>
@@ -40,9 +48,7 @@ export function Navbar() {
 }
 ```
 
-## `useLiteAuth`
-
-Returns the auth context value.
+## Return values
 
 | Field | Type | Description |
 |---|---|---|
@@ -54,17 +60,3 @@ Returns the auth context value.
 ::: warning
 `useLiteAuth` must be used inside `<LiteAuthProvider>`. Calling it outside will throw an error.
 :::
-
-## Custom API paths
-
-If your route handlers are at a different path:
-
-```tsx
-<LiteAuthProvider
-  loginPath="/api/auth/login"
-  logoutPath="/api/auth/logout"
-  mePath="/api/auth/me"
->
-  {children}
-</LiteAuthProvider>
-```

@@ -1,16 +1,19 @@
 # Middleware
 
-`auth.middleware(options)` returns a Next.js middleware function that protects routes by verifying the JWT cookie.
+Middleware provides **server-side** route protection. It runs on the Edge before the page renders, preventing unauthenticated users from even reaching protected routes.
+
+::: tip
+`LiteAuthProvider` already handles **client-side** protection automatically. Middleware is optional but recommended for stronger security.
+:::
 
 ## Setup
 
 ```ts
 // middleware.ts
-import { auth } from "@/lib/auth";
+import { middleware } from "@/auth";
 
-export default auth.middleware({
+export default middleware({
   protect: ["/dashboard", "/settings", "/admin"],
-  redirectTo: "/login", // optional, default is "/login"
 });
 
 export const config = {
@@ -29,16 +32,17 @@ export const config = {
 
 1. Checks if the current `pathname` starts with any value in `protect`
 2. If not protected — passes the request through
-3. If protected — reads and verifies the JWT from the cookie
+3. If protected — reads and verifies the JWT cookie
 4. Valid token → passes through
-5. Invalid or missing token → redirects to `redirectTo?from=<pathname>`
+5. Invalid or missing token → redirects to `redirectTo`
 
-The `?from=` query param lets you redirect back after login:
+## Client-side vs server-side protection
 
-```ts
-// app/login/page.tsx
-const searchParams = useSearchParams();
-const from = searchParams.get("from") ?? "/dashboard";
-// after successful login:
-router.push(from);
-```
+| | `LiteAuthProvider` | Middleware |
+|---|---|---|
+| Where it runs | Browser | Edge (server) |
+| How it protects | Renders login UI instead of children | Redirects before page loads |
+| Required | Yes | Optional |
+| Setup | `protect` prop | `middleware.ts` file |
+
+Use both together for the best experience.

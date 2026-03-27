@@ -1,15 +1,14 @@
 # createLiteAuth
 
-The main factory function. Call it once and export the result.
+The main factory function. Call it once in `auth.ts` and export the result.
 
 ## Signature
 
 ```ts
 function createLiteAuth(config: LiteAuthConfig): {
   handlers: {
-    login: (req: NextRequest) => Promise<NextResponse>;
-    logout: (req: NextRequest) => Promise<NextResponse>;
-    me: (req: NextRequest) => Promise<NextResponse>;
+    GET: (req: NextRequest) => Promise<NextResponse>;
+    POST: (req: NextRequest) => Promise<NextResponse>;
   };
   middleware: (options: MiddlewareOptions) => (req: NextRequest) => Promise<NextResponse>;
   getUserFromCookies: (cookies: ReadonlyRequestCookies) => Promise<PublicUser | null>;
@@ -27,12 +26,19 @@ function createLiteAuth(config: LiteAuthConfig): {
 ## Example
 
 ```ts
+// auth.ts
 import { createLiteAuth } from "next-lite-auth";
 
-export const auth = createLiteAuth({
+export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
   users: [
-    { email: "admin@example.com", password: "secret", role: "admin" },
+    { email: "admin@example.com", password: "secret", role: "admin", name: "Admin" },
   ],
   jwtSecret: process.env.JWT_SECRET!,
 });
+```
+
+```ts
+// app/api/auth/[...liteauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
 ```
