@@ -2,6 +2,8 @@
 
 Lightweight JWT auth for Next.js using static JSON users — no database required.
 
+Easy integration and deployment
+
 **[Documentation](https://amide-init.github.io/next-lite-auth/)**
 
 > **Not for production.** Designed for demos, OSS projects, internal tools, and quick Vercel deployments.
