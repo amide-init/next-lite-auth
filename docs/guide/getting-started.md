@@ -6,12 +6,11 @@
 - Next.js >= 13
 - React >= 18
 - TypeScript
-- Tailwind CSS + shadcn/ui (for built-in login UI)
 
 ## Installation
 
 ```bash
-pnpm add next-lite-auth jose
+pnpm add next-lite-auth
 ```
 
 ---
@@ -22,19 +21,20 @@ pnpm add next-lite-auth jose
 
 ```ts
 // auth.ts
-import { createLiteAuth } from "next-lite-auth";
+import { createLiteAuth, usersFromEnv } from "next-lite-auth";
 
 export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
-  users: [
-    { email: "admin@example.com", password: "secret", role: "admin", name: "Admin" },
-  ],
-  jwtSecret: process.env.JWT_SECRET!,
+  users: usersFromEnv(),
+  jwtSecret: process.env.LITE_AUTH_SECRET!,
+  enabled: process.env.LITE_AUTH_ENABLED !== "false",
 });
 ```
 
 ```bash
 # .env.local
-JWT_SECRET=your-random-secret-here
+LITE_AUTH_SECRET=your-random-secret-here
+LITE_AUTH_ENABLED=true
+LITE_AUTH_USERS=[{"email":"admin@example.com","password":"secret","role":"admin","name":"Admin"}]
 ```
 
 Generate a strong secret:
@@ -73,46 +73,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-**That's it.** When a user visits a protected route without being logged in, the built-in login UI appears automatically:
+**That's it.** When a user visits a protected route without being logged in, the built-in login UI appears automatically.
 
-<LoginPreview />
- After login, the original page renders — no redirects, no separate login page needed.
-
----
-
-## Tailwind setup
-
-The built-in login UI uses shadcn/ui Tailwind CSS variables. You need to tell Tailwind to scan the library's dist files so the styles are not purged.
-
-### Tailwind v4 (no config file)
-
-Add this to your global CSS file (`app/globals.css`):
-
-```css
-@source "../node_modules/next-lite-auth/dist";
-```
-
-### Tailwind v3 (tailwind.config.ts)
-
-```ts
-// tailwind.config.ts
-export default {
-  content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./node_modules/next-lite-auth/dist/**/*.{js,mjs}", // ← add this
-  ],
-};
-```
-
-Not sure which version you have? Run:
-```bash
-pnpm list tailwindcss
-```
-
-::: tip
-The login UI uses shadcn/ui CSS variables (`bg-primary`, `bg-card`, `text-muted-foreground`, etc.) so your existing shadcn theme is applied automatically.
-:::
+After login, the original page renders — no redirects, no separate login page needed.
 
 ---
 
@@ -166,7 +129,7 @@ export default async function DashboardPage() {
 ```
 
 ::: tip
-Store your `jwtSecret` in `.env.local` and never commit it to source control.
+Store `LITE_AUTH_SECRET` and `LITE_AUTH_USERS` in `.env.local` and never commit them to source control.
 :::
 
 ::: warning Not for production
