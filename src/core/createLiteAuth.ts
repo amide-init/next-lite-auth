@@ -7,6 +7,7 @@ export function createLiteAuth(config: LiteAuthConfig) {
     users: config.users,
     jwtSecret: config.jwtSecret,
     cookieName: config.cookieName ?? "lite-auth-token",
+    enabled: config.enabled ?? true,
   };
 
   return {

@@ -50,12 +50,14 @@ export function makeHandlers(ctx: LiteAuthContext) {
   }
 
   async function GET(req: NextRequest): Promise<NextResponse> {
+    if (!ctx.enabled) return NextResponse.json({ user: null });
     const action = req.nextUrl.pathname.split("/").pop();
     if (action === "me") return me(req);
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   async function POST(req: NextRequest): Promise<NextResponse> {
+    if (!ctx.enabled) return NextResponse.json({ ok: true });
     const action = req.nextUrl.pathname.split("/").pop();
     if (action === "login") return login(req);
     if (action === "logout") return logout(req);
