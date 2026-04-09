@@ -1,11 +1,116 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { CSSProperties, FormEvent, useState } from "react";
 import { useLiteAuth } from "./LiteAuthProvider";
 
 type LiteLoginPageProps = {
   title?: string;
   description?: string;
+};
+
+const styles: Record<string, CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f9fafb",
+    padding: "0 16px",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+  },
+  container: {
+    width: "100%",
+    maxWidth: "360px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px",
+  },
+  header: {
+    textAlign: "center",
+  },
+  title: {
+    margin: "0 0 4px",
+    fontSize: "22px",
+    fontWeight: 600,
+    color: "#111827",
+    letterSpacing: "-0.01em",
+  },
+  description: {
+    margin: 0,
+    fontSize: "14px",
+    color: "#6b7280",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "24px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+  },
+  error: {
+    backgroundColor: "#fef2f2",
+    border: "1px solid #fecaca",
+    borderRadius: "6px",
+    padding: "8px 12px",
+    fontSize: "13px",
+    color: "#dc2626",
+  },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  label: {
+    fontSize: "13px",
+    fontWeight: 500,
+    color: "#374151",
+  },
+  input: {
+    height: "36px",
+    width: "100%",
+    borderRadius: "6px",
+    border: "1px solid #d1d5db",
+    padding: "0 12px",
+    fontSize: "14px",
+    color: "#111827",
+    backgroundColor: "#fff",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color 0.15s",
+  },
+  inputFocus: {
+    borderColor: "#6366f1",
+    boxShadow: "0 0 0 3px rgba(99,102,241,0.15)",
+  },
+  button: {
+    height: "36px",
+    width: "100%",
+    borderRadius: "6px",
+    border: "none",
+    backgroundColor: "#111827",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "opacity 0.15s",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+    pointerEvents: "none",
+  },
+  footer: {
+    textAlign: "center",
+    fontSize: "12px",
+    color: "#9ca3af",
+  },
+  link: {
+    color: "#6b7280",
+    textDecoration: "underline",
+    textUnderlineOffset: "3px",
+  },
 };
 
 export function LiteLoginPage({
@@ -15,6 +120,7 @@ export function LiteLoginPage({
   const { login } = useLiteAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,31 +138,22 @@ export function LiteLoginPage({
     if (result.error) {
       setError(result.error);
     }
-    // no redirect needed — login() sets user in context,
-    // LiteAuthProvider re-renders children automatically
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm space-y-6">
-
-        <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground">{description}</p>
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h1 style={styles.title}>{title}</h1>
+          <p style={styles.description}>{description}</p>
         </div>
 
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {error}
-            </div>
-          )}
+        <div style={styles.card}>
+          {error && <div style={styles.error}>{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium leading-none">
-                Email
-              </label>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={styles.field}>
+              <label htmlFor="email" style={styles.label}>Email</label>
               <input
                 id="email"
                 name="email"
@@ -64,14 +161,17 @@ export function LiteLoginPage({
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  ...styles.input,
+                  ...(focusedField === "email" ? styles.inputFocus : {}),
+                }}
+                onFocus={() => setFocusedField("email")}
+                onBlur={() => setFocusedField(null)}
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium leading-none">
-                Password
-              </label>
+            <div style={styles.field}>
+              <label htmlFor="password" style={styles.label}>Password</label>
               <input
                 id="password"
                 name="password"
@@ -79,32 +179,39 @@ export function LiteLoginPage({
                 required
                 autoComplete="current-password"
                 placeholder="••••••••"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  ...styles.input,
+                  ...(focusedField === "password" ? styles.inputFocus : {}),
+                }}
+                onFocus={() => setFocusedField("password")}
+                onBlur={() => setFocusedField(null)}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 transition-colors"
+              style={{
+                ...styles.button,
+                ...(loading ? styles.buttonDisabled : {}),
+              }}
             >
               {loading ? "Signing in…" : "Sign in"}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p style={styles.footer}>
           Powered by{" "}
           <a
             href="https://github.com/amide-init/next-lite-auth"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-4 hover:text-primary transition-colors"
+            style={styles.link}
           >
             next-lite-auth
           </a>
         </p>
-
       </div>
     </div>
   );
