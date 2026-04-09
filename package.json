@@ -17,7 +17,9 @@
       "require": "./dist/client.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -41,6 +43,7 @@
     "jose": "^5.0.0"
   },
   "devDependencies": {
+    "@types/node": "^25.5.2",
     "@types/react": "^18.0.0",
     "next": "^14.0.0",
     "react": "^18.0.0",
@@ -62,6 +65,11 @@
   "bugs": {
     "url": "https://github.com/amide-init/next-lite-auth/issues"
   },
-  "keywords": ["nextjs", "auth", "jwt", "lightweight"],
+  "keywords": [
+    "nextjs",
+    "auth",
+    "jwt",
+    "lightweight"
+  ],
   "license": "MIT"
 }
