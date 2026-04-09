@@ -37,5 +37,6 @@ type LiteAuthConfig = {
   users: User[];
   jwtSecret: string;
   cookieName?: string;
+  enabled?: boolean;
 };
 ```

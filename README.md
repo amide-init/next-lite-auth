@@ -2,8 +2,6 @@
 
 Lightweight JWT auth for Next.js using static JSON users — no database required.
 
-Easy integration and deployment
-
 **[Documentation](https://amide-init.github.io/next-lite-auth/)**
 
 > **Not for production.** Designed for demos, OSS projects, internal tools, and quick Vercel deployments.
@@ -16,14 +14,13 @@ Easy integration and deployment
 - Next.js >= 13
 - React >= 18
 - TypeScript
-- Tailwind CSS + shadcn/ui (for built-in login UI)
 
 ---
 
 ## Installation
 
 ```bash
-pnpm add next-lite-auth jose
+pnpm add next-lite-auth
 ```
 
 ---
@@ -33,20 +30,23 @@ pnpm add next-lite-auth jose
 ### 1. Create `auth.ts` at your project root
 
 ```ts
-import { createLiteAuth } from "next-lite-auth";
+import { createLiteAuth, usersFromEnv } from "next-lite-auth";
 
 export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
-  users: [
-    { email: "admin@example.com", password: "secret", role: "admin", name: "Admin" },
-  ],
-  jwtSecret: process.env.JWT_SECRET!,
+  users: usersFromEnv(),
+  jwtSecret: process.env.LITE_AUTH_SECRET!,
+  enabled: process.env.LITE_AUTH_ENABLED !== "false",
 });
 ```
 
 ```bash
 # .env.local
-JWT_SECRET=your-random-secret-here
+LITE_AUTH_SECRET=your-random-secret-here
+LITE_AUTH_ENABLED=true
+LITE_AUTH_USERS=[{"email":"admin@example.com","password":"secret","role":"admin","name":"Admin"}]
 ```
+
+`auth.ts` is safe to commit — credentials live only in `.env.local`.
 
 ### 2. Add one route file
 
@@ -79,16 +79,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ---
 
-## Tailwind setup
+## OSS-friendly: toggle auth via env
 
-Add the library to your Tailwind `content` config so login UI styles are included:
+If you ship an OSS project using next-lite-auth, your users can enable or disable auth with a single env variable — no code changes needed:
 
-```ts
-// tailwind.config.ts
-content: [
-  "./app/**/*.{ts,tsx}",
-  "./node_modules/next-lite-auth/dist/**/*.{js,mjs}",
-]
+```bash
+# Disable auth (open access)
+LITE_AUTH_ENABLED=false
+
+# Enable auth
+LITE_AUTH_ENABLED=true
+LITE_AUTH_USERS=[{"email":"admin@example.com","password":"secret"}]
+LITE_AUTH_SECRET=your-secret
 ```
 
 ---
@@ -140,6 +142,7 @@ const user = await getUserFromCookies(cookies());
 | Export | Description |
 |---|---|
 | `createLiteAuth(config)` | Factory — returns `handlers`, `middleware`, `getUserFromCookies` |
+| `usersFromEnv()` | Reads `LITE_AUTH_USERS` env var and returns `User[]` |
 | `handlers.GET / POST` | Catch-all route handlers |
 | `middleware(options)` | Edge middleware for server-side route protection |
 | `getUserFromCookies(cookies)` | Server-side session helper |

@@ -17,23 +17,23 @@ function createLiteAuth(config: LiteAuthConfig): {
 
 ## Parameters
 
-| Param | Type | Required | Description |
-|---|---|---|---|
-| `users` | `User[]` | Yes | Hardcoded user list |
-| `jwtSecret` | `string` | Yes | Secret for signing JWTs |
-| `cookieName` | `string` | No | Cookie name (default: `"lite-auth-token"`) |
+| Param | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `users` | `User[]` | Yes | — | List of valid users. Use `usersFromEnv()` to load from env. |
+| `jwtSecret` | `string` | Yes | — | Secret for signing JWTs |
+| `cookieName` | `string` | No | `"lite-auth-token"` | Name of the httpOnly cookie |
+| `enabled` | `boolean` | No | `true` | When `false`, disables all auth — middleware and handlers become no-ops |
 
 ## Example
 
 ```ts
 // auth.ts
-import { createLiteAuth } from "next-lite-auth";
+import { createLiteAuth, usersFromEnv } from "next-lite-auth";
 
 export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
-  users: [
-    { email: "admin@example.com", password: "secret", role: "admin", name: "Admin" },
-  ],
-  jwtSecret: process.env.JWT_SECRET!,
+  users: usersFromEnv(),
+  jwtSecret: process.env.LITE_AUTH_SECRET!,
+  enabled: process.env.LITE_AUTH_ENABLED !== "false",
 });
 ```
 
@@ -41,4 +41,17 @@ export const { handlers, middleware, getUserFromCookies } = createLiteAuth({
 // app/api/auth/[...liteauth]/route.ts
 import { handlers } from "@/auth";
 export const { GET, POST } = handlers;
+```
+
+## usersFromEnv
+
+A helper that reads the `LITE_AUTH_USERS` environment variable and parses it as a `User[]`. Throws a descriptive error if the variable is missing or invalid JSON.
+
+```ts
+import { createLiteAuth, usersFromEnv } from "next-lite-auth";
+```
+
+```bash
+# .env.local
+LITE_AUTH_USERS=[{"email":"admin@example.com","password":"secret","role":"admin"}]
 ```
