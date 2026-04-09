@@ -2,22 +2,37 @@
 
 ## Setup
 
-Wrap your root layout with `LiteAuthProvider` and pass the routes you want to protect:
+`layout.tsx` is a **Server Component** by default. Importing `LiteAuthProvider` directly there triggers a `createContext` error. Create a client wrapper component first:
 
 ```tsx
-// app/layout.tsx
-import { LiteAuthProvider } from "next-lite-auth/client";
+// components/auth-provider.tsx
+'use client'
+
+import { LiteAuthProvider } from 'next-lite-auth/client'
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <LiteAuthProvider protect={["/dashboard", "/settings", "/admin"]}>
+      {children}
+    </LiteAuthProvider>
+  )
+}
+```
+
+Then use `AuthProvider` in your layout:
+
+```tsx
+// app/layout.tsx  ← Server Component, no 'use client'
+import { AuthProvider } from '@/components/auth-provider'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <LiteAuthProvider protect={["/dashboard", "/settings", "/admin"]}>
-          {children}
-        </LiteAuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
-  );
+  )
 }
 ```
 

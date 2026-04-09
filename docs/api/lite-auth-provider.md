@@ -10,20 +10,35 @@ import { LiteAuthProvider } from "next-lite-auth/client";
 
 ## Usage
 
+`layout.tsx` is a **Server Component** by default — importing `LiteAuthProvider` directly there triggers a `createContext` error at module evaluation time, before any rendering happens. Wrap it in a client component instead:
+
 ```tsx
-// app/layout.tsx
-import { LiteAuthProvider } from "next-lite-auth/client";
+// components/auth-provider.tsx
+'use client'
+
+import { LiteAuthProvider } from 'next-lite-auth/client'
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <LiteAuthProvider protect={["/dashboard", "/settings"]}>
+      {children}
+    </LiteAuthProvider>
+  )
+}
+```
+
+```tsx
+// app/layout.tsx  ← Server Component, no 'use client'
+import { AuthProvider } from '@/components/auth-provider'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <LiteAuthProvider protect={["/dashboard", "/settings"]}>
-          {children}
-        </LiteAuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
-  );
+  )
 }
 ```
 
