@@ -36,7 +36,7 @@ export default defineConfig({
       },
     ],
     socialLinks: [
-      { icon: "github", link: "https://github.com/aminuddin/next-lite-auth" },
+      { icon: "github", link: "https://github.com/amide-init/next-lite-auth" },
     ],
     footer: {
       message: "Released under the MIT License.",
