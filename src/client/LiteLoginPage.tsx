@@ -113,6 +113,41 @@ const styles: Record<string, CSSProperties> = {
   },
 };
 
+const darkModeCSS = `
+  @media (prefers-color-scheme: dark) {
+    .lite-auth-page { background-color: #09090b !important; }
+    .lite-auth-title { color: #fafafa !important; }
+    .lite-auth-desc { color: #a1a1aa !important; }
+    .lite-auth-card {
+      background-color: #18181b !important;
+      border-color: #27272a !important;
+      box-shadow: none !important;
+    }
+    .lite-auth-error {
+      background-color: rgba(239,68,68,0.1) !important;
+      border-color: rgba(239,68,68,0.3) !important;
+      color: #f87171 !important;
+    }
+    .lite-auth-label { color: #e4e4e7 !important; }
+    .lite-auth-input {
+      background-color: transparent !important;
+      border-color: #3f3f46 !important;
+      color: #fafafa !important;
+    }
+    .lite-auth-input::placeholder { color: #52525b !important; }
+    .lite-auth-input:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
+    }
+    .lite-auth-btn {
+      background-color: #fafafa !important;
+      color: #09090b !important;
+    }
+    .lite-auth-footer { color: #52525b !important; }
+    .lite-auth-link { color: #71717a !important; }
+  }
+`;
+
 export function LiteLoginPage({
   title = "Sign in",
   description = "Enter your credentials to continue",
@@ -141,78 +176,87 @@ export function LiteLoginPage({
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>{title}</h1>
-          <p style={styles.description}>{description}</p>
-        </div>
+    <>
+      <style>{darkModeCSS}</style>
+      <div className="lite-auth-page" style={styles.page}>
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h1 className="lite-auth-title" style={styles.title}>{title}</h1>
+            <p className="lite-auth-desc" style={styles.description}>{description}</p>
+          </div>
 
-        <div style={styles.card}>
-          {error && <div style={styles.error}>{error}</div>}
+          <div className="lite-auth-card" style={styles.card}>
+            {error && (
+              <div className="lite-auth-error" style={styles.error}>{error}</div>
+            )}
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div style={styles.field}>
-              <label htmlFor="email" style={styles.label}>Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="you@example.com"
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={styles.field}>
+                <label htmlFor="email" className="lite-auth-label" style={styles.label}>Email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  className="lite-auth-input"
+                  style={{
+                    ...styles.input,
+                    ...(focusedField === "email" ? styles.inputFocus : {}),
+                  }}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+
+              <div style={styles.field}>
+                <label htmlFor="password" className="lite-auth-label" style={styles.label}>Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  className="lite-auth-input"
+                  style={{
+                    ...styles.input,
+                    ...(focusedField === "password" ? styles.inputFocus : {}),
+                  }}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="lite-auth-btn"
                 style={{
-                  ...styles.input,
-                  ...(focusedField === "email" ? styles.inputFocus : {}),
+                  ...styles.button,
+                  ...(loading ? styles.buttonDisabled : {}),
                 }}
-                onFocus={() => setFocusedField("email")}
-                onBlur={() => setFocusedField(null)}
-              />
-            </div>
+              >
+                {loading ? "Signing in…" : "Sign in"}
+              </button>
+            </form>
+          </div>
 
-            <div style={styles.field}>
-              <label htmlFor="password" style={styles.label}>Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                style={{
-                  ...styles.input,
-                  ...(focusedField === "password" ? styles.inputFocus : {}),
-                }}
-                onFocus={() => setFocusedField("password")}
-                onBlur={() => setFocusedField(null)}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                ...styles.button,
-                ...(loading ? styles.buttonDisabled : {}),
-              }}
+          <p className="lite-auth-footer" style={styles.footer}>
+            Powered by{" "}
+            <a
+              href="https://github.com/amide-init/next-lite-auth"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="lite-auth-link"
+              style={styles.link}
             >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-          </form>
+              next-lite-auth
+            </a>
+          </p>
         </div>
-
-        <p style={styles.footer}>
-          Powered by{" "}
-          <a
-            href="https://github.com/amide-init/next-lite-auth"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.link}
-          >
-            next-lite-auth
-          </a>
-        </p>
       </div>
-    </div>
+    </>
   );
 }
