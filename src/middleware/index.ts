@@ -10,6 +10,7 @@ type MiddlewareOptions = {
 export function makeMiddleware(ctx: LiteAuthContext) {
   return function middleware(options: MiddlewareOptions) {
     return async function (req: NextRequest): Promise<NextResponse> {
+      if (!ctx.enabled) return NextResponse.next();
       const { protect, redirectTo = "/login" } = options;
       const { pathname } = req.nextUrl;
 

@@ -11,10 +11,12 @@ export type LiteAuthConfig = {
   users: User[];
   jwtSecret: string;
   cookieName?: string;
+  enabled?: boolean;
 };
 
 export type LiteAuthContext = {
   cookieName: string;
   jwtSecret: string;
   users: User[];
+  enabled: boolean;
 };
