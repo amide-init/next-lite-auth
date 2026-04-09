@@ -39,19 +39,6 @@ import { LiteLoginPage } from "next-lite-auth/client";
 | `title` | `string` | `"Sign in"` | Card heading |
 | `description` | `string` | `"Enter your credentials to continue"` | Card subheading |
 
-## Tailwind requirement
+## Styling
 
-Uses shadcn/ui CSS variables (`bg-primary`, `bg-card`, `text-muted-foreground`, etc.). Your existing shadcn theme is applied automatically.
-
-**Tailwind v4** — add to `app/globals.css`:
-```css
-@source "../node_modules/next-lite-auth/dist";
-```
-
-**Tailwind v3** — add to `tailwind.config.ts`:
-```ts
-content: [
-  "./app/**/*.{ts,tsx}",
-  "./node_modules/next-lite-auth/dist/**/*.{js,mjs}",
-]
-```
+The login page uses inline styles — no CSS framework required. It works out of the box in any Next.js project.

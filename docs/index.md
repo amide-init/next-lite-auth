@@ -22,4 +22,8 @@ features:
     details: One factory function wires everything together. Add route handlers and middleware in minutes.
   - title: TypeScript First
     details: Fully typed API with exported types for User, PublicUser, and LiteAuthConfig.
+  - title: OSS Ready
+    details: Load users and secrets from environment variables. Let your users toggle auth on or off without touching code.
 ---
+
+<LoginPreview />
