@@ -94,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 **That's it.** When a user visits a protected route without being logged in, the built-in login UI appears automatically.
 
-<LoginPreview />
+<LoginPreview appName="Acme Corp" />
 
 After login, the original page renders — no redirects, no separate login page needed.
 

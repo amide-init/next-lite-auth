@@ -20,7 +20,7 @@ import { LiteAuthProvider } from 'next-lite-auth/client'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    <LiteAuthProvider protect={["/dashboard", "/settings"]}>
+    <LiteAuthProvider protect={["/dashboard", "/settings"]} appName="Acme Corp">
       {children}
     </LiteAuthProvider>
   )
@@ -56,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 |---|---|---|---|
 | `children` | `ReactNode` | — | Your app |
 | `protect` | `(string \| RegExp)[]` | `[]` | Pathnames or patterns that require authentication |
+| `appName` | `string` | — | App name shown on the login page |
 | `loginPath` | `string` | `"/api/auth/login"` | Login endpoint |
 | `logoutPath` | `string` | `"/api/auth/logout"` | Logout endpoint |
 | `mePath` | `string` | `"/api/auth/me"` | Session endpoint |

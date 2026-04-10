@@ -4,6 +4,7 @@
       <div class="preview-card-wrap">
 
         <div class="preview-header">
+          <p v-if="appName" class="preview-appname">{{ appName }}</p>
           <h2 class="preview-title">{{ title }}</h2>
           <p class="preview-desc">{{ description }}</p>
         </div>
@@ -55,6 +56,7 @@
 import { ref } from 'vue'
 
 const props = withDefaults(defineProps<{
+  appName?: string
   title?: string
   description?: string
 }>(), {
@@ -100,6 +102,15 @@ async function handleSubmit() {
 
 .preview-header {
   text-align: center;
+}
+
+.preview-appname {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #818cf8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
 }
 
 .preview-title {
