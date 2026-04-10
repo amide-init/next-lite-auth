@@ -82,7 +82,7 @@ const styles: Record<string, CSSProperties> = {
     transition: "border-color 0.15s",
   },
   inputFocus: {
-    borderColor: "#6366f1",
+    border: "1px solid #6366f1",
     boxShadow: "0 0 0 3px rgba(99,102,241,0.15)",
   },
   button: {
