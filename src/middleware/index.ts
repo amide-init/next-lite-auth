@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LiteAuthContext } from "../core/types";
 import { verifyToken } from "../server/jwt";
+import { matchesProtect } from "../core/matchesProtect";
 
 type MiddlewareOptions = {
   protect: (string | RegExp)[];
@@ -14,11 +15,7 @@ export function makeMiddleware(ctx: LiteAuthContext) {
       const { protect, redirectTo = "/login" } = options;
       const { pathname } = req.nextUrl;
 
-      const isProtected = protect.some((pattern) =>
-        pattern instanceof RegExp
-          ? pattern.test(pathname)
-          : pattern === "/" || pathname === pattern || pathname.startsWith(pattern + "/")
-      );
+      const isProtected = matchesProtect(protect, pathname);
 
       if (!isProtected) {
         return NextResponse.next();

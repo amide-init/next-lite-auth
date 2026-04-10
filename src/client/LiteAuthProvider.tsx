@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { usePathname } from "next/navigation";
 import { PublicUser } from "../core/types";
 import { LiteLoginPage } from "./LiteLoginPage";
+import { matchesProtect } from "../core/matchesProtect";
 
 type LiteAuthContextValue = {
   user: PublicUser | null;
@@ -63,11 +64,7 @@ export function LiteAuthProvider({
 
   const value = { user, loading, login, logout };
 
-  const isProtected = protect.some((p) =>
-    p instanceof RegExp
-      ? p.test(pathname)
-      : p === "/" || pathname === p || pathname.startsWith(p + "/")
-  );
+  const isProtected = matchesProtect(protect, pathname);
 
   if (loading) {
     return (
