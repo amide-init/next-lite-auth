@@ -25,16 +25,38 @@ export const config = {
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `protect` | `string[]` | — | Route prefixes to protect |
+| `protect` | `(string \| RegExp)[]` | — | Pathnames or patterns to protect |
 | `redirectTo` | `string` | `"/login"` | Where to redirect unauthenticated users |
 
 ## How it works
 
-1. Checks if the current `pathname` starts with any value in `protect`
+1. Checks if the current `pathname` matches any value in `protect`
 2. If not protected — passes the request through
 3. If protected — reads and verifies the JWT cookie
 4. Valid token → passes through
 5. Invalid or missing token → redirects to `redirectTo`
+
+## Protect all routes
+
+Use `"/"` to lock every page:
+
+```ts
+export default middleware({
+  protect: ["/"],
+});
+```
+
+## Protect dynamic routes
+
+Use a `RegExp` for dynamic segments:
+
+```ts
+export default middleware({
+  protect: ["/dashboard", /^\/[^/]+\/name$/],
+});
+```
+
+This protects `/dashboard`, `/dashboard/settings`, and any `/:id/name` route.
 
 ## Client-side vs server-side protection
 

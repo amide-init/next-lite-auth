@@ -6,7 +6,7 @@
 
 ```ts
 auth.middleware(options: {
-  protect: string[];
+  protect: (string | RegExp)[];
   redirectTo?: string;
 }) => (req: NextRequest) => Promise<NextResponse>
 ```
@@ -15,7 +15,7 @@ auth.middleware(options: {
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `protect` | `string[]` | — | Pathname prefixes to protect |
+| `protect` | `(string \| RegExp)[]` | — | Pathnames or patterns to protect |
 | `redirectTo` | `string` | `"/login"` | Redirect destination for unauthenticated requests |
 
 ## Behavior
@@ -23,6 +23,9 @@ auth.middleware(options: {
 - Routes **not** in `protect` pass through
 - Routes in `protect` require a valid JWT cookie
 - Unauthenticated: redirects to `redirectTo?from=<pathname>`
+- String `"/"` protects all routes
+- Strings match exact paths and their prefixes (e.g. `"/dashboard"` also matches `"/dashboard/settings"`)
+- RegExp patterns match dynamically (e.g. `/^\/[^/]+\/name$/` matches `/:id/name`)
 
 ## Example
 
@@ -38,4 +41,20 @@ export default auth.middleware({
 export const config = {
   matcher: ["/((?!_next|api/auth).*)"],
 };
+```
+
+## Protect all routes
+
+```ts
+export default auth.middleware({
+  protect: ["/"],
+});
+```
+
+## Protect dynamic routes
+
+```ts
+export default auth.middleware({
+  protect: ["/dashboard", /^\/[^/]+\/name$/],
+});
 ```

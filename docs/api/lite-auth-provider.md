@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `children` | `ReactNode` | — | Your app |
-| `protect` | `string[]` | `[]` | Route prefixes that require authentication |
+| `protect` | `(string \| RegExp)[]` | `[]` | Pathnames or patterns that require authentication |
 | `loginPath` | `string` | `"/api/auth/login"` | Login endpoint |
 | `logoutPath` | `string` | `"/api/auth/logout"` | Logout endpoint |
 | `mePath` | `string` | `"/api/auth/me"` | Session endpoint |
