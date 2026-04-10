@@ -1,6 +1,6 @@
 {
   "name": "next-lite-auth",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lightweight JWT auth for Next.js using static JSON users (no database)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
