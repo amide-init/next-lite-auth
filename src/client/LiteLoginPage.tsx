@@ -4,6 +4,7 @@ import { CSSProperties, FormEvent, useState } from "react";
 import { useLiteAuth } from "./LiteAuthProvider";
 
 type LiteLoginPageProps = {
+  appName?: string;
   title?: string;
   description?: string;
 };
@@ -27,6 +28,14 @@ const styles: Record<string, CSSProperties> = {
   },
   header: {
     textAlign: "center",
+  },
+  appName: {
+    margin: "0 0 8px",
+    fontSize: "13px",
+    fontWeight: 600,
+    color: "#6366f1",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.08em",
   },
   title: {
     margin: "0 0 4px",
@@ -116,6 +125,7 @@ const styles: Record<string, CSSProperties> = {
 const darkModeCSS = `
   @media (prefers-color-scheme: dark) {
     .lite-auth-page { background-color: #09090b !important; }
+    .lite-auth-appname { color: #818cf8 !important; }
     .lite-auth-title { color: #fafafa !important; }
     .lite-auth-desc { color: #a1a1aa !important; }
     .lite-auth-card {
@@ -149,6 +159,7 @@ const darkModeCSS = `
 `;
 
 export function LiteLoginPage({
+  appName,
   title = "Sign in",
   description = "Enter your credentials to continue",
 }: LiteLoginPageProps) {
@@ -181,6 +192,7 @@ export function LiteLoginPage({
       <div className="lite-auth-page" style={styles.page}>
         <div style={styles.container}>
           <div style={styles.header}>
+            {appName && <p className="lite-auth-appname" style={styles.appName}>{appName}</p>}
             <h1 className="lite-auth-title" style={styles.title}>{title}</h1>
             <p className="lite-auth-desc" style={styles.description}>{description}</p>
           </div>

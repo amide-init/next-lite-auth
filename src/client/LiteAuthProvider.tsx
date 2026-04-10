@@ -18,6 +18,7 @@ const LiteAuthContext = createContext<LiteAuthContextValue | null>(null);
 type LiteAuthProviderProps = {
   children: ReactNode;
   protect?: (string | RegExp)[];
+  appName?: string;
   loginPath?: string;
   logoutPath?: string;
   mePath?: string;
@@ -26,6 +27,7 @@ type LiteAuthProviderProps = {
 export function LiteAuthProvider({
   children,
   protect = [],
+  appName,
   loginPath = "/api/auth/login",
   logoutPath = "/api/auth/logout",
   mePath = "/api/auth/me",
@@ -77,7 +79,7 @@ export function LiteAuthProvider({
   if (!user && isProtected) {
     return (
       <LiteAuthContext.Provider value={value}>
-        <LiteLoginPage />
+        <LiteLoginPage appName={appName} />
       </LiteAuthContext.Provider>
     );
   }
