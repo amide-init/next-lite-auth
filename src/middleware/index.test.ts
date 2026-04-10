@@ -117,6 +117,116 @@ describe("makeMiddleware — RegExp patterns", () => {
   });
 });
 
+describe("makeMiddleware — protect all routes ('/')", () => {
+  const middleware = makeMiddleware(ctx)({
+    protect: ["/"],
+  });
+
+  it("redirects / when unauthenticated", async () => {
+    const res = await middleware(makeReq("/"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /about when unauthenticated", async () => {
+    const res = await middleware(makeReq("/about"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /dashboard when unauthenticated", async () => {
+    const res = await middleware(makeReq("/dashboard"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /abc/name when unauthenticated", async () => {
+    const res = await middleware(makeReq("/abc/name"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects deeply nested route when unauthenticated", async () => {
+    const res = await middleware(makeReq("/a/b/c/d"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("allows any route when authenticated", async () => {
+    const token = await signToken({ email: "user@test.com" }, JWT_SECRET);
+    const res = await middleware(makeReq("/about", token));
+    expect(isRedirect(res)).toBe(false);
+  });
+});
+
+describe("makeMiddleware — protect /:id/name", () => {
+  const middleware = makeMiddleware(ctx)({
+    protect: [/^\/[^/]+\/name$/],
+  });
+
+  it("redirects /abc/name", async () => {
+    const res = await middleware(makeReq("/abc/name"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /123/name", async () => {
+    const res = await middleware(makeReq("/123/name"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /user-id_99/name", async () => {
+    const res = await middleware(makeReq("/user-id_99/name"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("allows /abc/other (wrong segment)", async () => {
+    const res = await middleware(makeReq("/abc/other"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("allows /abc/name/extra (too many segments)", async () => {
+    const res = await middleware(makeReq("/abc/name/extra"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("allows /name (missing id segment)", async () => {
+    const res = await middleware(makeReq("/name"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("allows authenticated request on /:id/name", async () => {
+    const token = await signToken({ email: "user@test.com" }, JWT_SECRET);
+    const res = await middleware(makeReq("/abc/name", token));
+    expect(isRedirect(res)).toBe(false);
+  });
+});
+
+describe("makeMiddleware — protect all routes + /:id/name together", () => {
+  const middleware = makeMiddleware(ctx)({
+    protect: ["/", /^\/[^/]+\/name$/],
+  });
+
+  it("redirects / when unauthenticated", async () => {
+    const res = await middleware(makeReq("/"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /abc/name when unauthenticated", async () => {
+    const res = await middleware(makeReq("/abc/name"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("redirects /random-page when unauthenticated", async () => {
+    const res = await middleware(makeReq("/random-page"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("allows all routes when authenticated", async () => {
+    const token = await signToken({ email: "user@test.com" }, JWT_SECRET);
+    const res1 = await middleware(makeReq("/", token));
+    const res2 = await middleware(makeReq("/abc/name", token));
+    const res3 = await middleware(makeReq("/random-page", token));
+    expect(isRedirect(res1)).toBe(false);
+    expect(isRedirect(res2)).toBe(false);
+    expect(isRedirect(res3)).toBe(false);
+  });
+});
+
 describe("makeMiddleware — mixed string and RegExp patterns", () => {
   const middleware = makeMiddleware(ctx)({
     protect: ["/dashboard", /^\/[^/]+\/name$/],
