@@ -58,24 +58,38 @@ export const { GET, POST } = handlers;
 
 ### 3. Wrap root layout
 
+`layout.tsx` is a Server Component — wrap `LiteAuthProvider` in a client component first:
+
+```tsx
+// components/auth-provider.tsx
+"use client";
+import { LiteAuthProvider } from "next-lite-auth/client";
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <LiteAuthProvider protect={["/dashboard", "/settings"]} appName="My App">
+      {children}
+    </LiteAuthProvider>
+  );
+}
+```
+
 ```tsx
 // app/layout.tsx
-import { LiteAuthProvider } from "next-lite-auth/client";
+import { AuthProvider } from "@/components/auth-provider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <LiteAuthProvider protect={["/dashboard", "/settings"]}>
-          {children}
-        </LiteAuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
 }
 ```
 
-**Done.** Visiting a protected route while logged out automatically shows the built-in login UI. After login, the original page renders instantly — no redirects, no separate login page needed.
+**Done.** Visiting a protected route while logged out automatically shows the built-in login UI with your app name. After login, the original page renders instantly — no redirects, no separate login page needed.
 
 ---
 
@@ -97,10 +111,17 @@ LITE_AUTH_SECRET=your-secret
 
 ## Optional: server-side middleware
 
+Strings protect exact and prefix routes. Use `"/"` to protect everything, or `RegExp` for dynamic routes:
+
 ```ts
 // middleware.ts
 import { middleware } from "@/auth";
-export default middleware({ protect: ["/dashboard", "/settings"] });
+
+export default middleware({
+  protect: ["/dashboard", "/settings"],   // string prefixes
+  // protect: ["/"],                       // protect all routes
+  // protect: [/^\/[^/]+\/name$/],         // dynamic route /:id/name
+});
 
 export const config = {
   matcher: ["/((?!_next|api/auth).*)"],
@@ -146,7 +167,7 @@ const user = await getUserFromCookies(cookies());
 | `handlers.GET / POST` | Catch-all route handlers |
 | `middleware(options)` | Edge middleware for server-side route protection |
 | `getUserFromCookies(cookies)` | Server-side session helper |
-| `LiteAuthProvider` | Root provider — manages session and auto-shows login UI |
+| `LiteAuthProvider` | Root provider — manages session, auto-shows login UI (`appName`, `protect` props) |
 | `useLiteAuth()` | Hook — `user`, `loading`, `login`, `logout` |
 
 ---
