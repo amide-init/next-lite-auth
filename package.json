@@ -23,6 +23,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build",
     "docs:dev": "vitepress dev docs",
@@ -43,7 +44,8 @@
     "react": "^18.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "vitepress": "^1.0.0"
+    "vitepress": "^1.0.0",
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.0.0",
