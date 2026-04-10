@@ -16,7 +16,7 @@ const LiteAuthContext = createContext<LiteAuthContextValue | null>(null);
 
 type LiteAuthProviderProps = {
   children: ReactNode;
-  protect?: string[];
+  protect?: (string | RegExp)[];
   loginPath?: string;
   logoutPath?: string;
   mePath?: string;
@@ -63,8 +63,10 @@ export function LiteAuthProvider({
 
   const value = { user, loading, login, logout };
 
-  const isProtected = protect.some(
-    (p) => pathname === p || pathname.startsWith(p + "/")
+  const isProtected = protect.some((p) =>
+    p instanceof RegExp
+      ? p.test(pathname)
+      : p === "/" || pathname === p || pathname.startsWith(p + "/")
   );
 
   if (loading) {
