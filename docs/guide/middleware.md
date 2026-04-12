@@ -26,15 +26,17 @@ export const config = {
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `protect` | `(string \| RegExp)[]` | — | Pathnames or patterns to protect |
+| `nonProtected` | `(string \| RegExp)[]` | `[]` | Pathnames or patterns that are always public, even if matched by `protect` |
 | `redirectTo` | `string` | `"/login"` | Where to redirect unauthenticated users |
 
 ## How it works
 
-1. Checks if the current `pathname` matches any value in `protect`
-2. If not protected — passes the request through
-3. If protected — reads and verifies the JWT cookie
-4. Valid token → passes through
-5. Invalid or missing token → redirects to `redirectTo`
+1. Checks if the current `pathname` matches any value in `nonProtected` — if so, passes through immediately
+2. Checks if the current `pathname` matches any value in `protect`
+3. If not protected — passes the request through
+4. If protected — reads and verifies the JWT cookie
+5. Valid token → passes through
+6. Invalid or missing token → redirects to `redirectTo`
 
 ## Protect all routes
 
@@ -43,6 +45,27 @@ Use `"/"` to lock every page:
 ```ts
 export default middleware({
   protect: ["/"],
+});
+```
+
+## Exempt public pages from a broad protect rule
+
+Use `nonProtected` to keep specific routes publicly accessible even when `protect` covers everything:
+
+```ts
+export default middleware({
+  protect: ["/"],
+  nonProtected: ["/docs", "/privacy-policy", "/terms"],
+});
+```
+
+`nonProtected` is evaluated before `protect`, so these routes are never redirected regardless of how broad the protect pattern is. It accepts the same types as `protect` — plain strings (with prefix matching) and `RegExp` patterns.
+
+```ts
+// Mix strings and RegExp
+export default middleware({
+  protect: ["/"],
+  nonProtected: ["/docs", /^\/blog\//],
 });
 ```
 

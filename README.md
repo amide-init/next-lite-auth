@@ -128,6 +128,17 @@ export const config = {
 };
 ```
 
+Use `nonProtected` to keep specific pages public even when `protect` covers all routes:
+
+```ts
+export default middleware({
+  protect: ["/"],
+  nonProtected: ["/docs", "/privacy-policy", "/terms"],
+});
+```
+
+`nonProtected` is checked first — matching routes always pass through, regardless of `protect`.
+
 ---
 
 ## Use anywhere
