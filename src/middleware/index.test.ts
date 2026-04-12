@@ -227,6 +227,44 @@ describe("makeMiddleware — protect all routes + /:id/name together", () => {
   });
 });
 
+describe("makeMiddleware — nonProtected overrides protect", () => {
+  const middleware = makeMiddleware(ctx)({
+    protect: ["/"],
+    nonProtected: ["/docs", "/privacy-policy", /^\/blog\//],
+  });
+
+  it("allows /docs without auth", async () => {
+    const res = await middleware(makeReq("/docs"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("allows /docs/getting-started without auth", async () => {
+    const res = await middleware(makeReq("/docs/getting-started"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("allows /privacy-policy without auth", async () => {
+    const res = await middleware(makeReq("/privacy-policy"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("allows /blog/post-1 matching nonProtected regex without auth", async () => {
+    const res = await middleware(makeReq("/blog/post-1"));
+    expect(isRedirect(res)).toBe(false);
+  });
+
+  it("still redirects /dashboard without auth", async () => {
+    const res = await middleware(makeReq("/dashboard"));
+    expect(isRedirect(res)).toBe(true);
+  });
+
+  it("still allows authenticated request on protected route", async () => {
+    const token = await signToken({ email: "user@test.com" }, JWT_SECRET);
+    const res = await middleware(makeReq("/dashboard", token));
+    expect(isRedirect(res)).toBe(false);
+  });
+});
+
 describe("makeMiddleware — mixed string and RegExp patterns", () => {
   const middleware = makeMiddleware(ctx)({
     protect: ["/dashboard", /^\/[^/]+\/name$/],
